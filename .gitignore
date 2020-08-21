@@ -1,0 +1,12 @@
+.DS_Store  
+*/.DS_Store
+/.DS_Store
+
+data/fmri
+data/fmri/*
+convert2bids
+convert2bids/*
+defacing/
+defacing/*
+
+scripts/9_NIFTI_tools

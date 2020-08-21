@@ -1,0 +1,252 @@
+---
+title: "Semantic Analyses"
+output: html_document
+---
+
+```{r echo = FALSE, warning=FALSE, message=FALSE}
+rm(list=(ls()))
+
+######################################################################## 
+#                               Load Packages                          #
+########################################################################
+library(plyr)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(car)
+library(Hmisc)  
+library(lmerTest) 
+library(broom)
+library(cowplot)
+library(ridge)
+library(lmridge)
+library(rtf)
+
+###################### Script Specific Functions #######################
+asNumeric <- function(x) as.numeric(as.character(x))
+factorsNumeric <- function(d) modifyList(d, lapply(d[, sapply(d, is.factor)],   
+                                                   asNumeric))
+sem <- 
+  function(x) {sd(x,na.rm = T) / sqrt(length(x))}
+
+myPalette <- c("#4C72B0","#C44E52")
+
+redo_calc = 0;
+```
+
+
+```{r data_preprocessing, fig.width = 6, fig.height= 2}
+######################################################################## 
+#                       Load and preprocess data                       #
+########################################################################
+# load data
+d0 = read.csv("../../data/fmri/roi_tc/DMPFC/neural_polarization.csv", header = FALSE)
+colnames(d0) = c('onset', 'offset', 'duration', 'movie', 'issue', 'neural_left',
+                 'neural_right', 'tc_difference', 'tc_diff_abs');
+
+d0$temp = "movie"
+d0 = unite(d0, movie, c(temp, movie),sep='')
+
+d0$movie = factor(d0$movie, levels = c("movie1","movie2","movie3","movie4","movie5","movie6",
+                                       "movie7","movie8","movie9","movie10","movie11","movie12",
+                                       "movie13","movie14","movie15","movie16","movie17","movie18",
+                                       "movie19","movie20","movie21","movie22","movie23","movie24"))
+
+d0 = d0 %>% 
+  dplyr::select('onset', 'offset', 'duration', 'movie', 'issue','neural_left','neural_right','tc_diff_abs')
+
+liwc_data = read.csv("../../data/semantic_categories/liwc_data.csv")
+
+d0$event = 1:86
+
+d0 = cbind(d0, liwc_data)
+```
+
+### Rescale data
+```{r}
+d1 = subset(d0, select = -c(onset:offset, movie:event))
+d1 = mutate_all(d1, scale)
+
+# Add variables back
+d1$tc_diff_abs = d0$tc_diff_abs
+d1$movie = d0$movie
+```
+
+### LME model with moral emotional terms only
+```{r fig.width = 4.5, fig.height = 4}
+res = lmer(tc_diff_abs ~ duration + WC + MoralEmotional + UniquelyMoral + UniquelyEmotional + (1 |movie), data = d1)
+summary(res)
+
+# 95% Confidence Interval
+# confint(res, method = "profile")[6:8,]
+
+# Calculate corrected p-values
+p_values = summary(res)$coefficients[4:6,"Pr(>|t|)"]
+p.adjust(p_values, method = 'holm')
+```
+
+### Plot Figure 3C
+```{r fig.width = 4.4, fig.height = 7.2}
+# Get coefficients
+dwplot_data = as.data.frame(summary(res)$coefficients)
+dwplot_data$Variable = row.names(dwplot_data)
+
+# Get confidence intervals
+df_con = as.data.frame(confint(res, method = "profile"))
+df_con$Variable = row.names(df_con)
+
+dwplot_data = left_join(dwplot_data,df_con)
+dwplot_data = filter(dwplot_data, Variable != '(Intercept)')
+dwplot_data$Variable = factor(dwplot_data$Variable,levels = rev(c('MoralEmotional', 'UniquelyMoral', 'UniquelyEmotional','duration','WC')))
+
+ggplot(dwplot_data, aes(x = Variable, y = Estimate)) + 
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = `2.5 %`, ymax = `97.5 %`), width = 0.1) + 
+  geom_hline(yintercept = 0, linetype = 2, size = 1) +
+  theme(panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_blank(),
+      axis.line = element_line(colour = "black"),
+      axis.text.x  = element_text(size=14,color="black"),
+      axis.text.y  = element_text(size=11.5,color="black"),
+      axis.title.x = element_text(size=14,color="black"),
+      axis.title.y = element_blank(),
+      strip.background = element_blank()) +
+  coord_flip(ylim = c(-0.04, 0.052)) 
+```
+
+### Mass univariate test
+```{r}
+semantic_cat = colnames(d1)[3:52]
+
+if (redo_calc){
+mass.uni = NULL
+
+for(i in 1:50){
+    
+    fml <- as.formula( paste('tc_diff_abs', "~", paste(c("duration","WC",semantic_cat[i],"(1 |movie)"), collapse="+")))
+    thisMod = lmer(fml, data = d1)
+    thisres = summary(thisMod)
+    
+    thisCon = confint(thisMod, method = "profile", quiet = T)[6,]
+    
+    this.uni = NULL
+    this.uni$Variable = semantic_cat[i]
+    this.uni$Estimate = thisres$coefficients[4,1]  
+    this.uni$SE = thisres$coefficients[4,2]  
+    this.uni$conf.low = thisCon[1]
+    this.uni$conf.hi = thisCon[2]
+    this.uni$df = thisres$coefficients[4,3]  
+    this.uni$t = thisres$coefficients[4,4] 
+    this.uni$p = thisres$coefficients[4,5] 
+
+    this.uni = as.data.frame(this.uni)
+    
+    mass.uni = rbind(mass.uni,this.uni)
+    
+    }
+
+mass.uni = as.data.frame(mass.uni)
+
+mass.uni$p.adjust = p.adjust(mass.uni$p, method = 'holm')
+
+save(mass.uni, file="mass_uni.Rda")
+
+} else {
+  
+  load("mass_uni.Rda")
+  
+}
+```
+
+### Plot Figure 4A 
+```{r fig.height = 3.1, fig.width = 6.2}
+# Sort 
+mass.uni.sorted = mass.uni[order(mass.uni$Estimate, decreasing = TRUE),]
+mass.uni.sorted$Variable = factor(mass.uni.sorted$Variable, 
+                                     levels = mass.uni.sorted$Variable)
+
+ggplot(mass.uni.sorted, aes(x = Variable, y = Estimate)) +
+  geom_point(size = 1) +
+  geom_hline(yintercept = 0, linetype = 2, size = 1) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.hi), width = 0.5) +
+  theme_classic() +
+  theme(legend.position="none",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(angle = 75, size = 8, hjust = 1),
+    axis.text.y = element_text(size = 10)) +
+  ylab('Coefficient')
+
+mass.uni.sorted.export = mass.uni.sorted %>%
+  mutate_if(is.numeric, round, digits=3) %>%
+  select(-c(conf.hi,conf.low,df))
+
+colnames(mass.uni.sorted.export) = c('Regressor', 'Coefficient', 'SE', 't', 'p','Corrected p')
+
+rtffile = RTF("TableS3.doc")  # this can be an .rtf or a .doc
+addTable(rtffile, mass.uni.sorted.export)
+done(rtffile)
+  
+```
+
+### Ridge Regression Model
+```{r}
+d2 = d1 %>% select(-movie) 
+
+# Use linearRidge to find lambda
+linearRidge_mod = linearRidge(tc_diff_abs ~ ., d2)
+lambda = linearRidge_mod$lambda[1]
+
+# linearRidge tests for significance assuming normal distribution, which is asymptotically true for large datasets. Given that we only have 86 segments, this will likely be liberal. To err on the side of being conservative, we refit the model with lmridge, which assumes a t-distribution with n - trace(Hat) degrees of freedom
+lmRidge_mod = lmridge(tc_diff_abs ~ ., d2, K = lambda)
+summary(lmRidge_mod)
+lmRidge_res = summary(lmRidge_mod)$summaries$`summary  1`
+
+t_975 = qt(0.975,lmRidge_res$df1)
+
+ridge_data = as.data.frame(lmRidge_res$coefficients)
+ridge_data$conf.lo = ridge_data$`Estimate (Sc)` - t_975 * ridge_data$`StdErr (Sc)`
+ridge_data$conf.hi= ridge_data$`Estimate (Sc)` + t_975 * ridge_data$`StdErr (Sc)`
+
+ridge_data$Variable = row.names(ridge_data)
+ridge_data = filter(ridge_data,  Variable != 'Intercept')
+```
+
+```{r fig.height = 3.1, fig.width = 6.2}
+ridge_data.sorted = ridge_data[order(ridge_data$`Estimate (Sc)`, decreasing = TRUE),]
+ridge_data.sorted$Variable = factor(ridge_data.sorted$Variable, levels = ridge_data.sorted$Variable)
+ridge_data.sorted$corrected_p = p.adjust(ridge_data.sorted$`Pr(>|t|)`, method = 'holm')
+
+ggplot(ridge_data.sorted, aes(x = Variable, y = `Estimate (Sc)`)) +
+  geom_point(size = 1) +
+  geom_hline(yintercept = 0, linetype = 2, size = 1) +
+  geom_errorbar(aes(ymin = conf.lo, ymax = conf.hi), width = 0.5) +
+  theme_classic() +
+  theme(legend.position="none",
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    panel.background = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(angle = 75, size = 8, hjust = 1),
+    axis.text.y = element_text(size = 10)) +
+  ylab('Ridge Coefficient (rescaled)')
+
+ridge_data.sorted.export = ridge_data.sorted %>%
+  mutate_if(is.numeric, round, digits=3) %>%
+  select(-c(Estimate, conf.hi,conf.lo))
+
+colnames(ridge_data.sorted.export) = c('Coefficient', 'SE', 't', 'p','Regressor','Corrected p')
+
+ridge_data.sorted.export = ridge_data.sorted.export %>%
+  dplyr::select(c('Regressor', 'Coefficient', 'SE', 't', 'p','Corrected p'))
+
+rtffile = RTF("TableS4.doc")  # this can be an .rtf or a .doc
+addTable(rtffile, ridge_data.sorted.export )
+done(rtffile)
+
+```
