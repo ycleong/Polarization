@@ -8,7 +8,7 @@ This repository hosts analyses code for our manuscript <i> Conservative and libe
 - fmri: [raw data will be made available on [OpenNeuro](https://openneuro.org/) upon publication]  
 - [behav](data/behav/VideoRating.csv): participants' rating for each video  
 - [semantic_categories](data/semantic_categories/liwc_data.csv): percentage of words in each of the 50 semantic categories for each segment  
-- [MTurkRatings](data/online_pretest/OnlinePretest.csv): MTurk ratings on the 6 issues
+- [MTurkRatings](data/MTurkRatings/OnlinePretest.csv): MTurk ratings on the 6 issues
 
 
 <b> scripts </b>  
