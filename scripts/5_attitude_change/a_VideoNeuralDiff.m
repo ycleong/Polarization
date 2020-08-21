@@ -31,7 +31,7 @@ right = subjects(ismember(all_id,r_id));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %% Calculate Liberal and Conservative Similarity
-load(fullfile(dirs.roi_tc,roi,sprintf('%s.mat', roi)));   % Generated using 4_polarization/NeuralDifference
+load(fullfile(dirs.roi_tc,roi,sprintf('%s.mat', roi)));   
 load('../../data/semantic_categories/movie_duration.mat');
 
 %% Compute timecourse of differences (1062 resolution)
