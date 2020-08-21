@@ -3,10 +3,9 @@
 # Skullstrip anatomical scans
 
 # Set Parameters
-#subjID=("1004" "1005" "1006" "1007" "1011" "1012" "1015" "1016" "1017" "1018" "1019" "1021" "1022" "1023" "1024")
-#subjID=("1027" "1028" "1029" "1030" "1031" "1032" "1033" "1034" "1035" "1036" "1037" "1038" "1039" "1040" "1041" "1042" "1043" "1044")
+subjID=("1004" "1005" "1006" "1007" "1008" "1009" "1011" "1012" "1014" "1015" "1016" "1017" "1018" "1019" "1020" "1021" "1022" "1023" "1024" "1026" "1027" "1028" "1029" "1030" "1031" "1032" "1033" "1034" "1035" "1036" "1037" "1038" "1039" "1040" "1041" "1042" "1043" "1044")
 
-# subjects that require manual intervention
+# bet doesn't seem to to work well with defaced data, the following subjects may require manual intervention if you use the defaced anatomicals
 # subjID=("1008" "1009" "1014" "1020" "1026")
 
 bid_dir='../../Polarization'

@@ -10,3 +10,5 @@ defacing/
 defacing/*
 
 scripts/9_NIFTI_tools
+
+.Rhistory
