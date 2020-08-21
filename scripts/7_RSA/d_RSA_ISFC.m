@@ -10,7 +10,6 @@ dirs.fMRI = '../../data/fmri/break_brain/';
 dirs.ISFC = '../../data/fmri/ISFC/';
 dirs.output = '../../data/fmri/RSA/';
 dirs.roitc = '../../data/fmri/roi_tc/';
-dirs.data = '../../data';
 
 roi = 'DMPFC';
 

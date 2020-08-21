@@ -8,6 +8,7 @@ This repository hosts analyses code for our manuscript <i> Conservative and libe
 - fmri: [raw data will be made available on [OpenNeuro](https://openneuro.org/) upon publication]  
 - [behav](data/behav/VideoRating.csv): participants' rating for each video  
 - [semantic_categories](data/semantic_categories/liwc_data.csv): percentage of words in each of the 50 semantic categories for each segment  
+- [online_pretest](data/online_pretest/OnlinePretest.csv)
 
 
 <b> scripts </b>  
@@ -16,6 +17,8 @@ This repository hosts analyses code for our manuscript <i> Conservative and libe
 - [3_semantic](scripts/3_semantic): semantic analyses    
 - [4_ISFC](scripts/4_ISFC): ISFC analyses   
 - [5_attitude_change](scripts/5_attitude_change): attitude change analyses    
+- [6_MTurkRatings](scripts/MTurkRatings): online ratings on the 6 issues
+- [7_RSA](scripts/7_RSA): representational similarity analyses  
 - [9_help_scripts](scripts/9_help_scripts): helper functions  
 - 9_NIFTI_tools: download from [here](https://www.mathworks.com/matlabcentral/fileexchange/8797-tools-for-nifti-and-analyze-image)  
 

@@ -1,5 +1,5 @@
 ---
-title: "Atitude Change"
+title: "Attitude Change"
 output: html_document
 ---
 

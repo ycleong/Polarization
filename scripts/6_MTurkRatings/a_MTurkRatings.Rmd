@@ -1,0 +1,139 @@
+---
+title: "Online Pretest"
+output: html_document
+---
+```{r echo = FALSE, warning=FALSE, message=FALSE}
+######################################################################## 
+#                               Load Packages                          #
+########################################################################
+library(plyr)
+library(tidyverse)
+library(ggpubr)
+library(car)
+library(Hmisc) #error bars 
+library(lme4) # package for random effects 
+library(lmerTest) # stats for random effects
+
+###################### Script Specific Functions #######################
+asNumeric <- function(x) as.numeric(as.character(x))
+factorsNumeric <- function(d) modifyList(d, lapply(d[, sapply(d, is.factor)],   
+                                                   asNumeric))
+sem <- 
+  function(x) {sd(x,na.rm = T) / sqrt(length(x))}
+
+myPalette <- c("#4C72B0","#C44E52","#984ea3")
+```
+
+```{r load_data}
+######################################################################## 
+#                       Load and preprocess data                       #
+########################################################################
+# load data
+d0 = read.csv("../../data/online_pretest/OnlinePretest.csv",fileEncoding="latin1")
+
+# Renaming columns
+d1 = d0;
+d1$gender = d0$Please.indicate.your.gender.
+d1$age = d0$Please.indicate.your.age.
+```
+
+#### Demographics
+```{r}
+######################################################################## 
+#                         Recoding Variables                           #
+########################################################################
+# Create New Variable Orientation
+d1$Orientation = recode(d1$Political.Affiliation.and.Ideology.2,"1:3='Liberal';4='Moderate';5:7='Conservative'")
+d1$Orientation = as.factor(d1$Orientation)
+
+d1$gender = dplyr::recode(d1$gender, 
+                          `F` = "female",
+                          Female = "female",
+                          FEMALE = "female",
+                          `female ` = "female",
+                          FEmale = "female",
+                          `Female ` = "female",
+                          Woman = "female",
+                          MALE = "male",
+                          m = "male",
+                          Male = "male")
+
+# Gender
+summary(d1$gender)
+
+# Age
+d1$age[(d1$age > 100)] = 54
+summary(d1$age)
+
+# Political Orientation
+summary(d1$Orientation)
+```
+
+#### Plot Graphs
+```{r echo = FALSE, warning=FALSE, message=FALSE, fig.height=6,fig.width=9,fig.align='center'}
+######################################################################
+#                         Summarize by Orientation                   #
+######################################################################
+IndvData = gather(d1,issue,Support,BorderWall:ICE)
+
+IndvData$issue = factor(IndvData$issue, levels = unique(IndvData$issue))
+
+IndvData$Orientation = factor(IndvData$Orientation,levels= c("Liberal", "Conservative", "Moderate"))
+IndvData$issue = factor(IndvData$issue,levels= c("WorkStatus", "Healthcare", "Citizenship","BorderWall","TravelBan","ICE"))
+
+# Transformatin to make y-axis start at 1 (since the scale actually starts at 1)
+t_shift <- scales::trans_new("shift",
+                             transform = function(x) {x-1},
+                             inverse = function(x) {x+1})
+
+GroupData = IndvData %>% 
+  group_by(Orientation,issue) %>%
+  dplyr::summarise(avg_rating = mean(Support), se = sem(Support))
+
+ggplot(IndvData, aes(x = Orientation, y = Support, color = Orientation)) +
+  geom_bar(aes(x = Orientation, y = avg_rating),
+           data = GroupData,
+           stat = "identity",
+           fill="white",
+           width = 0.3,
+           size = 1.2) +
+  geom_errorbar(aes(x = Orientation, y = NULL, ymin = avg_rating-se, ymax = avg_rating+se, color = Orientation),
+                data = GroupData,
+                width = 0.2) + 
+  geom_jitter(width = 0.05, height = 0, alpha = 0.1) +
+  scale_y_continuous(breaks = c(1, 3, 5, 7), trans = t_shift) +
+  theme(legend.position="none",
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.background = element_blank(),
+        axis.line = element_line(colour = "black"),
+        axis.text.x  = element_text(size=12,color="black"),
+        axis.text.y  = element_text(size=12,color="black"),
+        axis.title.x = element_blank(),
+        axis.title.y = element_text(size=14),
+        title = element_text(size=16),
+        strip.text.x = element_text(size = 14)) +
+  facet_wrap( ~ issue, ncol = 3) +
+  coord_cartesian(ylim = c(1,8)) + 
+  scale_color_manual(values = myPalette)
+```
+
+
+#### t-tests
+```{r}
+d2 = subset(d1, Orientation != "Moderate")
+
+t.test(WorkStatus ~ Orientation, data = d2)
+
+t.test(Healthcare ~ Orientation, data = d2)
+
+t.test(Citizenship ~ Orientation, data = d2)
+
+t.test(BorderWall ~ Orientation, data = d2)
+
+t.test(TravelBan ~ Orientation, data = d2)
+
+t.test(ICE ~ Orientation, data = d2)
+
+```
+
