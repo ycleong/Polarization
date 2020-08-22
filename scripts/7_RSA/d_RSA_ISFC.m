@@ -156,6 +156,6 @@ if save_maps
     nii.img = data;
     nii.img(isnan(nii.img)) = 0;
     
-    save_nii(nii,fullfile('../../data/fmri/maps/RSA_ISFC/ISFC_continuous','ISFC_continuous_p.nii'));
+    save_nii(nii,fullfile('../../data/fmri/maps/RSA_ISFC/ISFC_continuous','ISFC_continuous_invp.nii'));
             
 end

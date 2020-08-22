@@ -22,9 +22,6 @@ RDM_behav_vector = RDM_behav(ioffdiag);
 opts.run_corr = 1;
 opts.run_stats = 1;
 opts.save_maps = 1;
-opts.median = 1;
-
-
 
 %% Neural Data
 if opts.run_corr
