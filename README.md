@@ -5,7 +5,7 @@ output: html_document
 This repository hosts analyses code for our manuscript <i> Conservative and liberal attitudes drive polarized neural responses to political content </i>. If you have any questions, or find any bugs (or broken links), please email me at ycleong@berkeley.edu. A preprint is available here: https://ycleong.github.io/files/papers/LeongPNAS2020.pdf
 
 <b> data </b>  
-- fmri: [raw data are available on [OpenNeuro](https://openneuro.org/datasets/ds003095/versions/1.0.0]  
+- fmri: [raw data are available on [OpenNeuro](https://openneuro.org/datasets/ds003095/versions/1.0.0)  
 - [behav](data/behav/VideoRating.csv): participants' rating for each video  
 - [semantic_categories](data/semantic_categories/liwc_data.csv): percentage of words in each of the 50 semantic categories for each segment  
 - [MTurkRatings](data/MTurkRatings/OnlinePretest.csv): MTurk ratings on the 6 issues
