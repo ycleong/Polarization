@@ -1,4 +1,3 @@
-
 # FEAT version number
 set fmri(version) 6.00
 
@@ -30,7 +29,7 @@ set fmri(featwatcher_yn) 0
 set fmri(sscleanup_yn) 0
 
 # Output directory
-set fmri(outputdir) "/Users/yuanchangleong/Desktop/Polarization/data/fmri/glm/ChangeMyDesign/ChangeMySubj/runChangeMyRun.feat"
+set fmri(outputdir) "/ChangeMyAnalysisDir/data/fmri/glm/ChangeMyDesign/ChangeMySubj/runChangeMyRun.feat"
 
 # TR(s)
 set fmri(tr) 2.000000
@@ -273,13 +272,13 @@ set fmri(totalVoxels) 40876704
 set fmri(ncopeinputs) 0
 
 # 4D AVW data or FEAT directory (1)
-set feat_files(1) "/Users/yuanchangleong/Desktop/Polarization/Polarization/sub-ChangeMySubj/func/sub-ChangeMySubj_task-runChangeMyRun_bold"
+set feat_files(1) "/ChangeMyBidsDir/sub-ChangeMySubj/func/sub-ChangeMySubj_task-runChangeMyRun_bold"
 
 # Add confound EVs text file
 set fmri(confoundevs) 0
 
 # Subject's structural image for analysis 1
-set highres_files(1) "/Users/yuanchangleong/Desktop/Polarization/data/fmri/anat_brain/sub-ChangeMySubj_T1w_brain"
+set highres_files(1) "/ChangeMyAnalysisDir/data/fmri/anat_brain/sub-ChangeMySubj_T1w_brain"
 
 # EV 1 title
 set fmri(evtitle1) ""
