@@ -41,7 +41,7 @@ for subjID in "${subjNo[@]}"
 		do
 
 				# uncomment to remove the original data after running the model (to save disk space)
-				\rm /$bids_dir/sub-$subjID/func/sub-${subjID}_task-run${r}_bold.nii.gz
+				# \rm /$bids_dir/sub-$subjID/func/sub-${subjID}_task-run${r}_bold.nii.gz
 
 	  done
 done
