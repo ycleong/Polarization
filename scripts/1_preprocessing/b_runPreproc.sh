@@ -35,13 +35,10 @@ for subjID in "${subjNo[@]}"
         echo Running Subj $subjID run $r
         feat fsfs/$design/subj${subjID}_task_run${r}.fsf
 				done
-
-		for r in 1 2 3 4
-
-		do
-
-				# uncomment to remove the original data after running the model (to save disk space)
-				# \rm /$bids_dir/sub-$subjID/func/sub-${subjID}_task-run${r}_bold.nii.gz
-
-	  done
+	
+	# uncomment below to remove the original data after running the model (to save disk space)
+	#for r in 1 2 3 4
+	#do
+	#	\rm /$bids_dir/sub-$subjID/func/sub-${subjID}_task-run${r}_bold.nii.gz
+	#done
 done
